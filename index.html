@@ -296,7 +296,9 @@ function renderSavedHistory() {
     if (msg.role === 'assistant') addMessage('sunjae', msg.content);
     else if (msg.role === 'user') addMessage('user', msg.content);
   });
-  scrollToBottom();
+  setTimeout(() => scrollToBottom(), 100);
+  setTimeout(() => scrollToBottom(), 500);
+  setTimeout(() => scrollToBottom(), 1000);
 }
 
 async function startFirstLesson() {
