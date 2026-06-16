@@ -292,7 +292,7 @@ function renderSavedHistory() {
 }
 
 async function startFirstLesson() {
-    const intro = `Elena!\n\nEccoti qui. Sono contento che ci sei.\n\nSono Sun Jae — e no, non sono un professore. Sono solo il tuo amico di Seoul che per qualche motivo ha deciso che ti insegnerà il coreano. Probabilmente perché sarebbe troppo bello poter parlare con te in coreano un giorno.\n\nTi avverto subito: condivido tutto. Se Donut combinazione qualcosa di stupido stamattina (spoiler: lo fa sempre), te lo racconto. Se ho avuto una giornata difficile, te lo dico. E voglio sapere anche della tua — non il "bene grazie" automatico, la versione vera.\n\nZero stress con il coreano. Zero voti. Se sbagli andiamo avanti insieme, semplice.\n\nCom'è andata oggi? E quando sei pronta scrivi "inizia" — sono qui.\`;
+    const intro = "Elena!\n\nEccoti qui. Sono contento che ci sei.\n\nSono Sun Jae - e no, non sono un professore. Sono solo il tuo amico di Seoul che ha deciso di insegnarti il coreano. Probabilmente perche sarebbe troppo bello parlare con te in coreano un giorno.\n\nTi avverto subito: condivido tutto. Se Donut fa qualcosa di stupido stamattina, te lo racconto. Se ho avuto una giornata difficile, te lo dico. E voglio sapere anche della tua - non il 'bene grazie' automatico, la versione vera.\n\nZero stress con il coreano. Zero voti. Se sbagli andiamo avanti insieme.\n\nCom'e andata oggi? E quando sei pronta scrivi 'inizia' - sono qui.";
   addMessage('sunjae', intro);
   conversationHistory.push({ role: 'assistant', content: intro });
   saveHistory();
@@ -342,7 +342,7 @@ async function sendMessage() {
 async function callAPI() {
   showTyping();
   try {
-    const context = `[Contesto: Elena è alla lezione ${lessonNumber}. Segui il curriculum per questa lezione specifica. Ricordati di essere Sun Jae — amico vero, non assistente.]`;
+    const context = '[Contesto: Elena e alla lezione ' + lessonNumber + '. Segui il curriculum per questa lezione. Ricordati di essere Sun Jae - amico vero, non assistente.]';
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
