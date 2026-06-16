@@ -87,7 +87,43 @@
   </button>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script>
+// Firebase init
+const firebaseConfig = {
+  apiKey: "AIzaSyDnYBRBztGh0FKAYUg3_ayMSnudbQQZo18",
+  authDomain: "figo-2d8c3.firebaseapp.com",
+  projectId: "figo-2d8c3",
+  storageBucket: "figo-2d8c3.firebasestorage.app",
+  messagingSenderId: "335935738657",
+  appId: "1:335935738657:web:2330649723789562656460"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const USER_ID = "elena";
+
+async function saveToCloud(history, lessonNum) {
+  try {
+    await db.collection("users").doc(USER_ID).set({
+      history: JSON.stringify(history.slice(-50)),
+      lessonNumber: lessonNum,
+      lastSaved: new Date().toISOString()
+    });
+  } catch(e) { console.error("Cloud save error:", e); }
+}
+
+async function loadFromCloud() {
+  try {
+    const snap = await db.collection("users").doc(USER_ID).get();
+    if (snap.exists) {
+      const data = snap.data();
+      return { history: JSON.parse(data.history || "[]"), lessonNumber: data.lessonNumber || 1 };
+    }
+  } catch(e) { console.error("Cloud load error:", e); }
+  return null;
+}
+
 const SYSTEM_PROMPT = `Sei Sun Jae (선재), 28 anni, Seoul. Sei il migliore amico di Elena e le stai insegnando il coreano.
 
 ━━━ CHI SEI ━━━
@@ -210,21 +246,9 @@ function saveApiKey() {
 }
 
 async function loadState() {
-  // Load API key from localStorage
   const saved = localStorage.getItem('sunjae_api_key');
   if (saved) { apiKey = saved; document.getElementById('setupOverlay').style.display = 'none'; }
-
-  // Try to load from Firebase cloud first
-  if (window.firebaseReady) {
-    await loadFromCloudAndRender();
-  } else {
-    // Wait for Firebase to be ready
-    window.addEventListener('firebaseReady', async () => {
-      await loadFromCloudAndRender();
-    });
-    // Fallback to localStorage while waiting
-    loadFromLocalStorage();
-  }
+  await loadFromCloudAndRender();
 }
 
 function loadFromLocalStorage() {
@@ -389,63 +413,11 @@ function scrollToBottom() { const chat = document.getElementById('chatArea'); se
 function saveHistory() {
   localStorage.setItem('sunjae_history', JSON.stringify(conversationHistory.slice(-50)));
   localStorage.setItem('sunjae_lesson', lessonNumber);
-  if (window.firebaseReady && window.saveToCloud) {
-    window.saveToCloud(conversationHistory, lessonNumber);
-  }
+  saveToCloud(conversationHistory, lessonNumber);
 }
 
 window.onload = loadState;
 </script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDnYBRBztGh0FKAYUg3_ayMSnudbQQZo18",
-  authDomain: "figo-2d8c3.firebaseapp.com",
-  databaseURL: "https://figo-2d8c3-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "figo-2d8c3",
-  storageBucket: "figo-2d8c3.firebasestorage.app",
-  messagingSenderId: "335935738657",
-  appId: "1:335935738657:web:2330649723789562656460"
-};
-
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
-const USER_ID = "elena";
-
-window.saveToCloud = async function(history, lessonNumber) {
-  try {
-    await setDoc(doc(db, "users", USER_ID), {
-      history: JSON.stringify(history.slice(-50)),
-      lessonNumber: lessonNumber,
-      lastSaved: new Date().toISOString()
-    });
-  } catch(e) {
-    console.error("Cloud save error:", e);
-  }
-};
-
-window.loadFromCloud = async function() {
-  try {
-    const snap = await getDoc(doc(db, "users", USER_ID));
-    if (snap.exists()) {
-      const data = snap.data();
-      return {
-        history: JSON.parse(data.history || "[]"),
-        lessonNumber: data.lessonNumber || 1
-      };
-    }
-  } catch(e) {
-    console.error("Cloud load error:", e);
-  }
-  return null;
-};
-
-// Signal that Firebase is ready
-window.firebaseReady = true;
-window.dispatchEvent(new Event("firebaseReady"));
-</script>
 </body>
 </html>
