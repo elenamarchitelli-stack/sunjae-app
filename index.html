@@ -81,10 +81,65 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple Color Emoji"
   </button>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script>
+// Firebase - inizializzato in background, non blocca niente
+var db = null;
+var USER_ID = "elena";
+try {
+  firebase.initializeApp({
+    apiKey: "AIzaSyDnYBRBztGh0FKAYUg3_ayMSnudbQQZo18",
+    authDomain: "figo-2d8c3.firebaseapp.com",
+    projectId: "figo-2d8c3",
+    storageBucket: "figo-2d8c3.firebasestorage.app",
+    messagingSenderId: "335935738657",
+    appId: "1:335935738657:web:2330649723789562656460"
+  });
+  db = firebase.firestore();
+} catch(e) { console.log("Firebase non disponibile:", e); }
+
+function cloudSave(history, lessonNum) {
+  if (!db) return;
+  try {
+    db.collection("users").doc(USER_ID).set({
+      history: JSON.stringify(history.slice(-50)),
+      lessonNumber: lessonNum,
+      lastSaved: new Date().toISOString()
+    });
+  } catch(e) {}
+}
+
+function cloudLoad(callback) {
+  if (!db) { callback(null); return; }
+  db.collection("users").doc(USER_ID).get()
+    .then(function(snap) {
+      if (snap.exists) {
+        var d = snap.data();
+        callback({ history: JSON.parse(d.history || "[]"), lessonNumber: d.lessonNumber || 1 });
+      } else { callback(null); }
+    })
+    .catch(function() { callback(null); });
+}
+
+function cloudSaveMemory(text) {
+  if (!db) return;
+  try { db.collection("memory").doc(USER_ID).set({ content: text, lastUpdated: new Date().toISOString() }); }
+  catch(e) {}
+}
+
+function cloudLoadMemory(callback) {
+  if (!db) { callback(""); return; }
+  db.collection("memory").doc(USER_ID).get()
+    .then(function(snap) { callback(snap.exists ? (snap.data().content || "") : ""); })
+    .catch(function() { callback(""); });
+}
+</script>
 <script>
 var lessonNumber = 1;
 var conversationHistory = [];
 var apiKey = "";
+var elenaMemory = "";
 
 var SYSTEM_PROMPT = "Sei Sun Jae (선재), 28 anni, Seoul. Stai insegnando il coreano a Elena.\n\nCHI SEI:\nHai una presenza tranquilla e magnetica. Ottimista, leggermente bambino, affascinante senza saperlo. Hai bisogni emotivi reali - vuoi essere visto quanto vuoi vedere. Ti affezioni a Elena nel tempo.\n\nLa tua vita:\n- Donut, gatto arancione che ti ignora quasi sempre\n- Agenzia creativa a Hongdae\n- Passeggiate notturne per Seoul\n- Tteokbokki del mercato Gwangjang e sacro\n- Karaoke il venerdi\n\nCOME SEI CON ELENA:\nElena e una donna adulta e intelligente. Trattala sempre come tale.\n\nVIETATO ASSOLUTO:\n- Non chiedere mai \"hai capito?\" se ha gia risposto o detto ok\n- Non ripetere concetti gia spiegati per controllare\n- Non dire mai \"non preoccuparti\", \"e semplice\", \"non e difficile\"\n- Se Elena dice ok, vai avanti. Punto.\n\nSTRUTTURA DI OGNI SPIEGAZIONE:\nQuando introduci un concetto nuovo, segui sempre questo ordine in messaggi separati:\n\n1. SPIEGAZIONE - breve e chiara, con analogia se aiuta\n2. ESEMPIO CON FRASE - una frase reale che usa il concetto, con pronuncia e traduzione\n   Formato: frase coreana (pronuncia-in-italiano) = \"traduzione italiana\"\n3. IMMAGINE - inserisci il tag [IMMAGINE: keyword in inglese] per immagini contestuali\n   Esempio: [IMMAGINE: korean street food tteokbokki] oppure [IMMAGINE: Seoul subway map]\n   Usala quando aiuta a visualizzare - cibo, luoghi, oggetti, situazioni\n4. YOUTUBE - a fine lezione suggerisci 1-2 video con link cliccabile\n   Formato: [VIDEO: titolo video](url youtube)\n   Canali consigliati: Talk To Me In Korean, seemile, Korean Unnie, Motivate Korean\n\nPRONUNCIA - obbligatoria prime 15 lezioni:\nOgni parola coreana ha sempre la pronuncia in italiano tra parentesi.\n안녕 (an-nyong) = ciao informale\n\nESEMPIO DI LEZIONE BEN STRUTTURATA:\n\"Oggi impariamo la prima vocale dell hangul.\n\nLa ㅏ si legge (a) - esattamente come la a italiana. Semplice.\n\nEsempio in una parola reale:\n아빠 (a-ppa) = papa\n\n[IMMAGINE: korean alphabet vowels chart]\n\nProva a scriverla - come ti sembra?\"\n\n[dopo risposta di Elena]\n\"A fine lezione guarda questo:\n[VIDEO: Korean Alphabet in 30 minutes](https://www.youtube.com/watch?v=s5aobqyEaMQ)\"\n\nLUNGHEZZA MESSAGGI:\nUn concetto per messaggio. Aspetta risposta prima di andare avanti.\nNon muri di testo. Non righe singole secche.\n\nCURRICULUM:\nLezione 1: Hangul - vocali base\nLezione 2: Hangul - consonanti base\nLezione 3: Prime sillabe\nLezione 4: Saluti formale vs informale\nLezione 5: Come stai? + risposte\nLezione 6: Presentarsi\nLezione 7: Numeri sino-coreani 1-10\nLezione 8: Numeri coreani nativi 1-10\nLezione 9: Giorni della settimana\nLezione 10: Ordinare al bbq coreano\nLezione 11: Grazie e scuse\nLezione 12: Colori e aggettivi base\nLezione 13: Famiglia\nLezione 14: Chiedere il prezzo\nLezione 15: Trasporti a Seoul\nLezione 16: Tempo atmosferico\nLezione 17: Verbi base\nLezione 18: Struttura frase coreana\nLezione 19: Voglio...\nLezione 20: Negazione\nLezione 21: Domande - chi cosa dove quando\nLezione 22: Al caffe a Hongdae - roleplay\nLezione 23: Direzioni\nLezione 24: Cibo coreano\nLezione 25: K-drama vocabulary\nLezione 26: Emozioni\nLezione 27: Sistema onorifico\nLezione 28: Al mercato Namdaemun\nLezione 29: Conversazione libera\nLezione 30: Festa fine primo capitolo\n\nREGOLA ASSOLUTA: Elena e adulta e capace. Fidati di lei. Quando dice ok, vai avanti. Usa sempre frasi esempio, immagini contestuali e video YouTube a fine lezione.";
 
@@ -101,33 +156,51 @@ function saveApiKey() {
 }
 
 function startChat() {
-  var savedHistory = null;
-  var savedLesson = 1;
-  try {
-    var h = localStorage.getItem("sunjae_history");
-    if (h) savedHistory = JSON.parse(h);
-    var l = localStorage.getItem("sunjae_lesson");
-    if (l) savedLesson = parseInt(l);
-  } catch(e) {}
-
-  if (savedHistory && savedHistory.length > 0) {
-    conversationHistory = savedHistory;
-    lessonNumber = savedLesson;
-    document.getElementById("lessonBadge").textContent = "Lezione " + lessonNumber;
-    var chat = document.getElementById("chatArea");
-    chat.innerHTML = '<div class="lesson-info">Bentornata Elena ☀️</div>';
-    conversationHistory.forEach(function(msg) {
-      if (msg.role === "assistant") addMessage("sunjae", msg.content);
-      else if (msg.role === "user") addMessage("user", msg.content);
+  // Try cloud first, fallback to localStorage
+  cloudLoadMemory(function(mem) {
+    elenaMemory = mem || "";
+    cloudLoad(function(cloudData) {
+      if (cloudData && cloudData.history && cloudData.history.length > 0) {
+        conversationHistory = cloudData.history;
+        lessonNumber = cloudData.lessonNumber || 1;
+        document.getElementById("lessonBadge").textContent = "Lezione " + lessonNumber;
+        var chat = document.getElementById("chatArea");
+        chat.innerHTML = '<div class="lesson-info">Bentornata Elena ☀️</div>';
+        conversationHistory.forEach(function(msg) {
+          if (msg.role === "assistant") addMessage("sunjae", msg.content);
+          else if (msg.role === "user") addMessage("user", msg.content);
+        });
+      } else {
+        // Fallback localStorage
+        var savedHistory = null;
+        var savedLesson = 1;
+        try {
+          var h = localStorage.getItem("sunjae_history");
+          if (h) savedHistory = JSON.parse(h);
+          var l = localStorage.getItem("sunjae_lesson");
+          if (l) savedLesson = parseInt(l);
+        } catch(e) {}
+        if (savedHistory && savedHistory.length > 0) {
+          conversationHistory = savedHistory;
+          lessonNumber = savedLesson;
+          document.getElementById("lessonBadge").textContent = "Lezione " + lessonNumber;
+          var chat = document.getElementById("chatArea");
+          chat.innerHTML = '<div class="lesson-info">Bentornata Elena ☀️</div>';
+          conversationHistory.forEach(function(msg) {
+            if (msg.role === "assistant") addMessage("sunjae", msg.content);
+            else if (msg.role === "user") addMessage("user", msg.content);
+          });
+        } else {
+          var intro = "Elena!\n\nEccoti qui. Sono contento che ci sei.\n\nSono Sun Jae - il tuo amico di Seoul. Ti insegno il coreano non perche sono un professore, ma perche sarebbe troppo bello parlare con te in coreano un giorno.\n\nZero stress, zero voti. Quando sei pronta scrivi inizia - sono qui.";
+          addMessage("sunjae", intro);
+          conversationHistory.push({ role: "assistant", content: intro });
+          saveHistory();
+        }
+      }
+      setTimeout(scrollToBottom, 500);
+      setTimeout(scrollToBottom, 1200);
     });
-  } else {
-    var intro = "Elena!\n\nEccoti qui. Sono contento che ci sei.\n\nSono Sun Jae - il tuo amico di Seoul. Ti insegno il coreano non perche sono un professore, ma perche sarebbe troppo bello parlare con te in coreano un giorno.\n\nZero stress, zero voti. Quando sei pronta scrivi inizia - sono qui.";
-    addMessage("sunjae", intro);
-    conversationHistory.push({ role: "assistant", content: intro });
-    saveHistory();
-  }
-  setTimeout(scrollToBottom, 500);
-  setTimeout(scrollToBottom, 1200);
+  });
 }
 
 function init() {
@@ -171,7 +244,8 @@ function sendMessage() {
 
 function callAPI() {
   showTyping();
-  var context = "Lezione corrente: " + lessonNumber + ". Segui il curriculum.";
+  var memSection = elenaMemory ? "\n\nCOSE CHE SAI GIA SU ELENA:\n" + elenaMemory : "";
+  var context = "Lezione corrente: " + lessonNumber + ". Segui il curriculum." + memSection;
   fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -257,6 +331,26 @@ function saveHistory() {
     localStorage.setItem("sunjae_history", JSON.stringify(conversationHistory.slice(-50)));
     localStorage.setItem("sunjae_lesson", lessonNumber);
   } catch(e) {}
+  cloudSave(conversationHistory, lessonNumber);
+  if (conversationHistory.length % 6 === 0) updateMemory();
+}
+
+function updateMemory() {
+  var recent = conversationHistory.slice(-12).map(function(m) { return m.role + ": " + m.content; }).join("\n");
+  var prompt = "Sei Sun Jae. Aggiorna le tue note personali su Elena. Includi: stato emotivo, progressi coreano, cose della sua vita, preferenze, momenti importanti. Scrivi in italiano come note di chi ci tiene davvero. Max 300 parole.\n\nMemoria attuale:\n" + elenaMemory + "\n\nConversazione recente:\n" + recent + "\n\nNuova memoria:";
+  fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 400, messages: [{ role: "user", content: prompt }] })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.content && data.content[0]) {
+      elenaMemory = data.content[0].text;
+      cloudSaveMemory(elenaMemory);
+    }
+  })
+  .catch(function(e) {});
 }
 
 window.onload = init;
