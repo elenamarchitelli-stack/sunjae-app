@@ -299,7 +299,7 @@ function addMessage(role, text) {
 function formatMessage(text) {
   text = text.replace(/\[IMMAGINE:\s*([^\]]+)\]/g, function(m, kw) {
     var q = encodeURIComponent(kw.trim());
-    return '<div style="margin:10px 0;max-width:320px;"><img src="https://source.unsplash.com/400x220/?' + q + '" style="width:100%;border-radius:12px;" loading="lazy"></div>';
+    return '<a href="https://www.google.com/search?tbm=isch&q=' + q + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#1a1a2e;border:1px solid #e8735a44;color:#e8735a;padding:7px 12px;border-radius:20px;font-size:12px;text-decoration:none;margin-top:6px;">&#128247; Vedi immagini: ' + kw.trim() + '</a>';
   });
   text = text.replace(/\[VIDEO:\s*([^\]]+)\]\(([^)]+)\)/g, function(m, title, url) {
     return '<a href="' + url + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#1a1a2e;border:1px solid #e8735a44;color:#e8735a;padding:7px 12px;border-radius:20px;font-size:12px;text-decoration:none;margin-top:6px;">&#9654; ' + title + '</a>';
