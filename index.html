@@ -291,13 +291,15 @@ async function loadFromCloudAndRender() {
 }
 
 function renderSavedHistory() {
+  const chat = document.getElementById('chatArea');
   conversationHistory.forEach(msg => {
     if (msg.role === 'assistant') addMessage('sunjae', msg.content);
     else if (msg.role === 'user') addMessage('user', msg.content);
   });
-  setTimeout(() => scrollToBottom(), 100);
-  setTimeout(() => scrollToBottom(), 500);
-  setTimeout(() => scrollToBottom(), 1000);
+  // Force scroll after render with multiple attempts
+  const forceScroll = () => { chat.scrollTop = chat.scrollHeight; };
+  forceScroll();
+  [100, 300, 600, 1000, 1500, 2500].forEach(t => setTimeout(forceScroll, t));
 }
 
 async function startFirstLesson() {
