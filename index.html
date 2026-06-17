@@ -14,7 +14,7 @@
   .online-dot { position: absolute; bottom: 2px; right: 2px; width: 10px; height: 10px; background: #2ecc71; border-radius: 50%; border: 2px solid #111; }
   .header-info h2 { font-size: 15px; font-weight: 600; color: #f0f0f0; }
   .header-info p { font-size: 12px; color: #888; margin-top: 1px; }
-  .lesson-badge { margin-left: auto; background: #1a1a2e; border: 1px solid #e8735a44; color: #e8735a; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; cursor: pointer; }
+  .lesson-badge { margin-left: auto; background: #1a1a2e; border: 1px solid #e8735a44; color: #e8735a; font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
   .chat-area { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; max-width: 700px; width: 100%; margin: 0 auto; }
   .msg { display: flex; gap: 10px; align-items: flex-end; max-width: 85%; }
   .msg.user { align-self: flex-end; flex-direction: row-reverse; }
@@ -72,7 +72,7 @@
     <h2>Sun Jae 선재 &#9728;&#65039;</h2>
     <p>Il tuo amico di Seoul · Online adesso</p>
   </div>
-  <div class="lesson-badge" id="lessonBadge" onclick="nextLesson()" title="Clicca per avanzare lezione">Lezione 1</div>
+  <div class="lesson-badge" id="lessonBadge">Lezione 1</div>
 </div>
 
 <div class="chat-area" id="chatArea">
@@ -317,17 +317,7 @@ function autoResize(el) {
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
 
-function nextLesson() {
-  if (lessonNumber < 30) {
-    lessonNumber++;
-    localStorage.setItem('sunjae_lesson', lessonNumber);
-    document.getElementById('lessonBadge').textContent = 'Lezione ' + lessonNumber;
-    const msg = 'Inizia la lezione ' + lessonNumber;
-    addMessage('user', msg);
-    conversationHistory.push({ role: 'user', content: msg });
-    callAPI();
-  }
-}
+
 
 async function sendMessage() {
   const input = document.getElementById('userInput');
