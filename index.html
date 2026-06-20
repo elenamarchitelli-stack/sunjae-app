@@ -246,7 +246,7 @@ function sendMessage() {
 function callAPI() {
   showTyping();
   var memSection = elenaMemory ? "\n\nCOSE CHE SAI GIA SU ELENA:\n" + elenaMemory : "";
-  var context = "Lezione corrente: " + lessonNumber + ". Segui il curriculum." + memSection;
+  var context = "Lezione corrente: " + lessonNumber + ". Segui il curriculum. Ricordati di mettere 1-2 emoji in questo messaggio, e non scrivere mai link cliccabili o tag tipo [VIDEO] o [IMMAGINE]." + memSection;
   fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
