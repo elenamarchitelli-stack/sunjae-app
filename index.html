@@ -303,7 +303,7 @@ function formatMessage(text) {
   text = text.replace(/\[VIDEO:[^\]]*\]\([^)]*\)/g, '');
   text = text.replace(/\n/g, "<br>");
   text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-  text = text.replace(/([가-힣ㄱ-ㆎ]+)/g, '<span style="color:#e8735a;font-weight:600;font-size:16px;">$1</span>');
+  text = text.replace(/([가-힣ㄱ-ㆎ]+)/g, '<span style="color:#e8735a;font-weight:700;font-size:20px;letter-spacing:0.5px;">$1</span>');
   return text;
 }
 
