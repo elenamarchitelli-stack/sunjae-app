@@ -303,7 +303,8 @@ function formatMessage(text) {
   text = text.replace(/\[VIDEO:[^\]]*\]\([^)]*\)/g, '');
   text = text.replace(/<img[^>]*>/gi, '');
   text = text.replace(/https?:\/\/(www\.)?(youtube\.com|youtu\.be)[^\s<]*/gi, '');
-  text = text.replace(/\[[^\]]*\]\(https?:\/\/(www\.)?(youtube\.com|youtu\.be)[^)]*\)/gi, '');
+  // Block ALL markdown link syntax [text](url) - model keeps inventing fake video links
+  text = text.replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g, '$1');
   text = text.replace(/\n/g, "<br>");
   text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   text = text.replace(/([가-힣ㄱ-ㆎ]+)/g, '<span style="color:#e8735a;font-weight:700;font-size:20px;letter-spacing:0.5px;">$1</span>');
