@@ -197,8 +197,9 @@ function startChat() {
           saveHistory();
         }
       }
-      setTimeout(scrollToBottom, 500);
-      setTimeout(scrollToBottom, 1200);
+      [200, 500, 900, 1400, 2000, 3000, 4000].forEach(function(t) {
+        setTimeout(scrollToBottom, t);
+      });
     });
   });
 }
@@ -319,7 +320,7 @@ function hideTyping() { var el = document.getElementById("typingIndicator"); if 
 
 function scrollToBottom() {
   var chat = document.getElementById("chatArea");
-  chat.scrollTop = chat.scrollHeight;
+  if (chat) chat.scrollTop = chat.scrollHeight;
 }
 
 function saveHistory() {
