@@ -298,9 +298,10 @@ function addMessage(role, text) {
 }
 
 function formatMessage(text) {
-  // Images and video disabled temporarily
+  text = text.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
   text = text.replace(/\[IMMAGINE:[^\]]*\]/g, '');
   text = text.replace(/\[VIDEO:[^\]]*\]\([^)]*\)/g, '');
+  text = text.replace(/<img[^>]*>/gi, '');
   text = text.replace(/\n/g, "<br>");
   text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   text = text.replace(/([가-힣ㄱ-ㆎ]+)/g, '<span style="color:#e8735a;font-weight:700;font-size:20px;letter-spacing:0.5px;">$1</span>');
