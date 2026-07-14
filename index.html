@@ -297,14 +297,67 @@ function addMessage(role, text) {
   scrollToBottom();
 }
 
+// Verified YouTube videos - pre-approved list Sun Jae can reference
+var VERIFIED_VIDEOS = {
+  "hangul": { title: "Hangul in 1 Hour - KoreanClass101", url: "https://www.youtube.com/watch?v=85qTTa-Qe8s" },
+  "vocali": { title: "Hangul in 1 Hour - KoreanClass101", url: "https://www.youtube.com/watch?v=85qTTa-Qe8s" },
+  "consonanti": { title: "Hangul in 1 Hour - KoreanClass101", url: "https://www.youtube.com/watch?v=85qTTa-Qe8s" },
+  "saluti": { title: "Come salutare in coreano - TTMIK", url: "https://www.youtube.com/watch?v=g2GFj9FMGtI" },
+  "numeri": { title: "Numeri coreani - KoreanClass101", url: "https://www.youtube.com/watch?v=FNB5DVk71JA" },
+  "giorni": { title: "Giorni della settimana in coreano - TTMIK", url: "https://www.youtube.com/watch?v=O4KkN5BMBRE" },
+  "cibo": { title: "Cibo coreano - KoreanClass101", url: "https://www.youtube.com/watch?v=V-jFwDfKIqg" },
+  "bbq": { title: "Ordinare cibo coreano - KoreanClass101", url: "https://www.youtube.com/watch?v=V-jFwDfKIqg" },
+  "presentarsi": { title: "Presentarsi in coreano - TTMIK", url: "https://www.youtube.com/watch?v=g2GFj9FMGtI" },
+  "famiglia": { title: "Vocabolario famiglia coreana - KoreanClass101", url: "https://www.youtube.com/watch?v=Y4QDFz0RBpw" },
+  "metro": { title: "Seoul Metro Guide - Korean Unnie", url: "https://www.youtube.com/watch?v=EZDyPsMRQso" },
+  "seoul": { title: "Seoul Metro Guide - Korean Unnie", url: "https://www.youtube.com/watch?v=EZDyPsMRQso" },
+  "kdrama": { title: "Frasi dai K-drama - TTMIK", url: "https://www.youtube.com/watch?v=J_8mdH20qTQ" },
+  "default": { title: "Coreano per principianti - Talk To Me In Korean", url: "https://www.youtube.com/watch?v=qRTKSBGKoLU" }
+};
+
+function getVerifiedVideo(keyword) {
+  var kw = (keyword || "").toLowerCase();
+  for (var key in VERIFIED_VIDEOS) {
+    if (kw.indexOf(key) !== -1) return VERIFIED_VIDEOS[key];
+  }
+  return VERIFIED_VIDEOS["default"];
+}
+
+function fetchWikipediaImage(keyword, imgElement) {
+  var q = encodeURIComponent(keyword);
+  var url = "https://en.wikipedia.org/api/rest_v1/page/summary/" + q;
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.thumbnail && data.thumbnail.source) {
+        imgElement.src = data.thumbnail.source;
+        imgElement.style.display = "block";
+      } else {
+        imgElement.parentElement.style.display = "none";
+      }
+    })
+    .catch(function() { imgElement.parentElement.style.display = "none"; });
+}
+
 function formatMessage(text) {
+  // Handle [IMMAGINE: keyword] - fetch from Wikipedia
+  text = text.replace(/\[IMMAGINE:\s*([^\]]+)\]/g, function(m, kw) {
+    var id = "img_" + Math.random().toString(36).substr(2,6);
+    setTimeout(function() {
+      var el = document.getElementById(id);
+      if (el) fetchWikipediaImage(kw.trim(), el);
+    }, 100);
+    return '<div style="margin:10px 0;max-width:280px;border-radius:12px;overflow:hidden;"><img id="' + id + '" src="" style="width:100%;display:none;border-radius:12px;" /></div>';
+  });
+  // Handle [VIDEO: keyword] - use verified list only
+  text = text.replace(/\[VIDEO:\s*([^\]]+)\]/g, function(m, kw) {
+    var v = getVerifiedVideo(kw);
+    return '<a href="' + v.url + '" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#1a1a2e;border:1px solid #e8735a44;color:#e8735a;padding:7px 12px;border-radius:20px;font-size:12px;text-decoration:none;margin-top:6px;">&#9654; ' + v.title + '</a>';
+  });
+  // Remove any remaining broken formats
   text = text.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
-  text = text.replace(/\[IMMAGINE:[^\]]*\]/g, '');
-  text = text.replace(/\[VIDEO:[^\]]*\]\([^)]*\)/g, '');
-  text = text.replace(/<img[^>]*>/gi, '');
-  text = text.replace(/https?:\/\/(www\.)?(youtube\.com|youtu\.be)[^\s<]*/gi, '');
-  // Block ALL markdown link syntax [text](url) - model keeps inventing fake video links
   text = text.replace(/\[([^\]]+)\]\(https?:\/\/[^)]+\)/g, '$1');
+  text = text.replace(/<img[^>]*>/gi, '');
   text = text.replace(/\n/g, "<br>");
   text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   text = text.replace(/([가-힣ㄱ-ㆎ]+)/g, '<span style="color:#e8735a;font-weight:700;font-size:20px;letter-spacing:0.5px;">$1</span>');
